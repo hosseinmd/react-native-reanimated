@@ -19,18 +19,9 @@
 #import "Nodes/REAAlwaysNode.h"
 #import "Nodes/REAConcatNode.h"
 #import "Nodes/REAFormatNode.h"
-#import "REAModule.h"
-
-@interface RCTUIManager ()
-
-- (void)updateView:(nonnull NSNumber *)reactTag
-          viewName:(NSString *)viewName
-             props:(NSDictionary *)props;
-
-- (void)setNeedsLayout;
-
-@end
-
+#import "Nodes/REAParamNode.h"
+#import "Nodes/REAFunctionNode.h"
+#import "Nodes/REACallFuncNode.h"
 
 // Interface below has been added in order to use private methods of RCTUIManager,
 // RCTUIManager#UpdateView is a React Method which is exported to JS but in
@@ -232,6 +223,9 @@
             @"always": [REAAlwaysNode class],
             @"concat": [REAConcatNode class],
             @"format": [REAFormatNode class],
+            @"param": [REAParamNode class],
+            @"func": [REAFunctionNode class],
+            @"callfunc": [REACallFuncNode class],
 //            @"listener": nil,
             };
   });
@@ -266,7 +260,6 @@
   REANode *parentNode = _nodes[parentID];
   REANode *childNode = _nodes[childID];
 
-  RCTAssertParam(parentNode);
   RCTAssertParam(childNode);
 
   [parentNode addChild:childNode];
@@ -280,7 +273,6 @@
   REANode *parentNode = _nodes[parentID];
   REANode *childNode = _nodes[childID];
 
-  RCTAssertParam(parentNode);
   RCTAssertParam(childNode);
 
   [parentNode removeChild:childNode];
@@ -319,7 +311,9 @@
   REANode *eventNode = _nodes[eventNodeID];
   RCTAssert([eventNode isKindOfClass:[REAEventNode class]], @"Event node is of an invalid type");
 
-  NSString *key = [NSString stringWithFormat:@"%@%@", viewTag, eventName];
+  NSString *key = [NSString stringWithFormat:@"%@%@",
+                   viewTag,
+                   RCTNormalizeInputEventName(eventName)];
   RCTAssert([_eventMapping objectForKey:key] == nil, @"Event handler already set for the given view and event type");
   [_eventMapping setObject:eventNode forKey:key];
 }
@@ -328,13 +322,17 @@
           eventName:(NSString *)eventName
         eventNodeID:(REANodeID)eventNodeID
 {
-  NSString *key = [NSString stringWithFormat:@"%@%@", viewTag, eventName];
+  NSString *key = [NSString stringWithFormat:@"%@%@",
+                   viewTag,
+                   RCTNormalizeInputEventName(eventName)];
   [_eventMapping removeObjectForKey:key];
 }
 
 - (void)processEvent:(id<RCTEvent>)event
 {
-  NSString *key = [NSString stringWithFormat:@"%@%@", event.viewTag, event.eventName];
+  NSString *key = [NSString stringWithFormat:@"%@%@",
+                   event.viewTag,
+                   RCTNormalizeInputEventName(event.eventName)];
   REAEventNode *eventNode = [_eventMapping objectForKey:key];
   [eventNode processEvent:event];
 }
@@ -353,21 +351,23 @@
   static dispatch_once_t directEventNamesToken;
   dispatch_once(&directEventNamesToken, ^{
     directEventNames = @[
-      @"onContentSizeChange",
-      @"onMomentumScrollBegin",
-      @"onMomentumScrollEnd",
-      @"onScroll",
-      @"onScrollBeginDrag",
-      @"onScrollEndDrag"
+      @"topContentSizeChange",
+      @"topMomentumScrollBegin",
+      @"topMomentumScrollEnd",
+      @"topScroll",
+      @"topScrollBeginDrag",
+      @"topScrollEndDrag"
     ];
   });
   
-  return [directEventNames containsObject:event.eventName];
+  return [directEventNames containsObject:RCTNormalizeInputEventName(event.eventName)];
 }
 
 - (void)dispatchEvent:(id<RCTEvent>)event
 {
-  NSString *key = [NSString stringWithFormat:@"%@%@", event.viewTag, event.eventName];
+  NSString *key = [NSString stringWithFormat:@"%@%@",
+                   event.viewTag,
+                   RCTNormalizeInputEventName(event.eventName)];
   REANode *eventNode = [_eventMapping objectForKey:key];
 
   if (eventNode != nil) {
@@ -388,6 +388,16 @@
 {
   _uiProps = uiProps;
   _nativeProps = nativeProps;
+}
+
+- (void)setValueForNodeID:(nonnull NSNumber *)nodeID value:(nonnull NSNumber *)newValue
+{
+  RCTAssertParam(nodeID);
+
+  REANode *node = _nodes[nodeID];
+
+  REAValueNode *valueNode = (REAValueNode *)node;
+  [valueNode setValue:newValue];
 }
 
 @end
