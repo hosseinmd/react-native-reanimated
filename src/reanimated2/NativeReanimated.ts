@@ -1,6 +1,8 @@
+//@ts-ignore
 import { TurboModuleRegistry } from 'react-native';
 
 const InnerNativeModule =
+  //@ts-ignore
   global.__reanimatedModuleProxy ||
   TurboModuleRegistry.getEnforcing('NativeReanimated');
 

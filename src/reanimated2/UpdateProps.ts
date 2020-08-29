@@ -22,5 +22,6 @@ export default function updateProps(viewTag, updates) {
       updates[key] = processColor(updates[key]);
     }
   });
+  //@ts-ignore
   _updateProps(viewTag, updates);
 }

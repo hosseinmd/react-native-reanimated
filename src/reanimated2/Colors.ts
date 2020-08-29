@@ -27,6 +27,7 @@ const uiCachedMatchers = makeRemote({});
 
 function getMatchers() {
   'worklet';
+  //@ts-ignore
   const cachedMatchers = _WORKLET ? uiCachedMatchers : jsCachedMatchers;
   if (cachedMatchers.rgb === undefined) {
     cachedMatchers.rgb = new RegExp('rgb' + call(NUMBER, NUMBER, NUMBER));
@@ -392,7 +393,7 @@ function normalizeColor(color) {
   return null;
 }
 
-export default function processColor(color) {
+export default function processColor(color: any) {
   'worklet';
   if (color === null || color === undefined || typeof color === 'number') {
     return color;

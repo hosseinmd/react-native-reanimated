@@ -1,6 +1,13 @@
 import { Extrapolate } from '../derived/interpolate';
 
-function internalInterpolate(x, l, r, ll, rr, type) {
+function internalInterpolate(
+  x: number,
+  l: number,
+  r: number,
+  ll: number,
+  rr: number,
+  type: Extrapolate
+) {
   'worklet';
   if (r - l === 0) return ll;
   const progress = (x - l) / (r - l);
@@ -28,9 +35,14 @@ function internalInterpolate(x, l, r, ll, rr, type) {
   return val;
 }
 
-export function interpolate(x, input, output, type) {
+export function interpolate(
+  x: number,
+  input: Array<number>,
+  output: Array<number>,
+  type?: Extrapolate
+): number {
   'worklet';
-  if (x && x.__nodeID) {
+  if (x && (x as any).__nodeID) {
     throw new Error(
       'Reanimated: interpolate from V1 has been renamed to interpolateNode.'
     );
@@ -54,5 +66,8 @@ export function interpolate(x, input, output, type) {
       }
     }
   }
-  return internalInterpolate.apply({}, [x].concat(narrowedInput).concat(type));
+  return internalInterpolate.apply(
+    {},
+    [x].concat(narrowedInput).concat(type as any)
+  );
 }

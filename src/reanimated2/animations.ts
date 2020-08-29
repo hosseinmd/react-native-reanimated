@@ -1,9 +1,16 @@
 /* global _WORKLET */
 import { Easing } from './Easing';
+import {
+  WithSpringConfig,
+  WithDecayConfig,
+  SharedValue,
+  WithTimingConfig,
+  SharedValueType,
+} from './types';
 
 let IN_STYLE_UPDATER = false;
 
-const assertNumber = (value, callerName) => {
+const assertNumber = (value: number, callerName: string) => {
   const valueType = typeof value;
   if (valueType !== 'number') {
     let error = `invalid type of toValue passed to ${callerName}, expected \`number\`, got \`${valueType}\``;
@@ -14,31 +21,38 @@ const assertNumber = (value, callerName) => {
   }
 };
 
-export function initialUpdaterRun(updater) {
+export function initialUpdaterRun(updater: () => any) {
   IN_STYLE_UPDATER = true;
   const result = updater();
   IN_STYLE_UPDATER = false;
   return result;
 }
 
-function defineAnimation(starting, factory) {
+function defineAnimation(starting: any, factory: any) {
   'worklet';
   if (IN_STYLE_UPDATER) {
     return starting;
   }
+  //@ts-ignore
   if (_WORKLET) {
     return factory();
   }
   return factory;
 }
 
-export function cancelAnimation(sharedValue) {
+export function cancelAnimation<T extends SharedValueType>(
+  sharedValue: SharedValue<T>
+) {
   'worklet';
   // setting the current value cancels the animation if one is currently running
   sharedValue.value = sharedValue.value; // eslint-disable-line no-self-assign
 }
 
-export function withTiming(toValue, userConfig, callback) {
+export function withTiming(
+  toValue: number,
+  userConfig?: WithTimingConfig,
+  callback?: (isCancelled: boolean) => void
+) {
   'worklet';
   // check toValue
   assertNumber(toValue, 'withTiming');
@@ -105,7 +119,11 @@ export function withTiming(toValue, userConfig, callback) {
   });
 }
 
-export function withSpring(toValue, userConfig, callback) {
+export function withSpring(
+  toValue: number,
+  userConfig?: WithSpringConfig,
+  callback?: (isCancelled: boolean) => void
+): number {
   'worklet';
   // check toValue
   assertNumber(toValue, 'withSpring');
@@ -123,7 +141,7 @@ export function withSpring(toValue, userConfig, callback) {
       overshootClamping: false,
       restDisplacementThreshold: 0.001,
       restSpeedThreshold: 0.001,
-    };
+    } as WithSpringConfig;
     if (userConfig) {
       Object.keys(userConfig).forEach((key) => (config[key] = userConfig[key]));
     }
@@ -226,13 +244,16 @@ export function withSpring(toValue, userConfig, callback) {
   });
 }
 
-export function withDecay(userConfig, callback) {
+export function withDecay(
+  userConfig: WithDecayConfig,
+  callback?: (isCancelled: boolean) => void
+): number {
   'worklet';
   return defineAnimation(0, () => {
     'worklet';
     const config = {
       deceleration: 0.998,
-    };
+    } as WithDecayConfig;
     if (userConfig) {
       Object.keys(userConfig).forEach((key) => (config[key] = userConfig[key]));
     }
@@ -292,18 +313,22 @@ export function withDecay(userConfig, callback) {
   });
 }
 
-export function delay(delayMs, _nextAnimation) {
+export function delay(
+  delayMS: number,
+  delayedAnimation: number | (() => number)
+): number {
   'worklet';
-  return defineAnimation(_nextAnimation, () => {
+  return defineAnimation(delayedAnimation, () => {
     'worklet';
 
-    const nextAnimation =
-      typeof _nextAnimation === 'function' ? _nextAnimation() : _nextAnimation;
+    const nextAnimation = (typeof delayedAnimation === 'function'
+      ? delayedAnimation()
+      : delayedAnimation) as any;
 
     function delay(animation, now) {
       const { startTime, started, previousAnimation } = animation;
 
-      if (now - startTime > delayMs) {
+      if (now - startTime > delayMS) {
         if (!started) {
           nextAnimation.start(
             nextAnimation,
@@ -349,11 +374,11 @@ export function delay(delayMs, _nextAnimation) {
   });
 }
 
-export function sequence(..._animations) {
+export function sequence(..._animations: [number, ...number[]]): number {
   'worklet';
   return defineAnimation(_animations[0], () => {
     'worklet';
-    const animations = _animations.map((a) => {
+    const animations = _animations.map((a: any) => {
       const result = typeof a === 'function' ? a() : a;
       result.finished = false;
       return result;
@@ -411,16 +436,16 @@ export function sequence(..._animations) {
 }
 
 export function repeat(
-  _nextAnimation,
-  numberOfReps = 2,
-  reverse = false,
-  callback
-) {
+  _nextAnimation: number,
+  numberOfReps?: number,
+  reverse?: boolean
+): number {
   'worklet';
   return defineAnimation(_nextAnimation, () => {
     'worklet';
 
     const nextAnimation =
+      //@ts-ignore
       typeof _nextAnimation === 'function' ? _nextAnimation() : _nextAnimation;
 
     function repeat(animation, now) {
@@ -451,7 +476,9 @@ export function repeat(
     }
 
     const repCallback = (finished) => {
+      //@ts-ignore
       if (callback) {
+        //@ts-ignore
         callback(finished);
       }
       // when cancelled call inner animation's callback
@@ -477,7 +504,7 @@ export function repeat(
 }
 
 /* Deprecated, kept for backward compatibility. Will be removed soon */
-export function loop(nextAnimation, numberOfLoops = 1) {
+export function loop(nextAnimation: number, numberOfLoops = 1) {
   'worklet';
   console.warn('Method `loop` is deprecated. Please use `repeat` instead');
   return repeat(nextAnimation, Math.round(numberOfLoops * 2), true);

@@ -1,6 +1,10 @@
 import NativeModule from './NativeReanimated';
 
 export default class WorkletEventHandler {
+  worklet: any;
+  eventNames: any[];
+  registrations: any;
+
   constructor(worklet, eventNames = []) {
     this.worklet = worklet;
     this.eventNames = eventNames;

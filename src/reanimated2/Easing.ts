@@ -1,4 +1,5 @@
 import { Bezier } from './Bezier';
+import { EasingFunction } from './types';
 
 /**
  * The `Easing` module implements common easing functions. This module is used
@@ -52,10 +53,10 @@ import { Bezier } from './Bezier';
  *
  * http://cubic-bezier.com/#0,0,1,1
  */
-function linear(t) {
+const linear: EasingFunction = (t) => {
   'worklet';
   return t;
-}
+};
 
 /**
  * A simple inertial interaction, similar to an object slowly accelerating to
@@ -63,10 +64,10 @@ function linear(t) {
  *
  * http://cubic-bezier.com/#.42,0,1,1
  */
-function ease(t) {
+const ease: EasingFunction = (t) => {
   'worklet';
   return Bezier(0.42, 0, 1, 1)(t);
-}
+};
 
 /**
  * A quadratic function, `f(t) = t * t`. Position equals the square of elapsed
@@ -74,10 +75,10 @@ function ease(t) {
  *
  * http://easings.net/#easeInQuad
  */
-function quad(t) {
+const quad: EasingFunction = (t) => {
   'worklet';
   return t * t;
-}
+};
 
 /**
  * A cubic function, `f(t) = t * t * t`. Position equals the cube of elapsed
@@ -85,10 +86,10 @@ function quad(t) {
  *
  * http://easings.net/#easeInCubic
  */
-function cubic(t) {
+const cubic: EasingFunction = (t) => {
   'worklet';
   return t * t * t;
-}
+};
 
 /**
  * A power function. Position is equal to the Nth power of elapsed time.
@@ -96,7 +97,7 @@ function cubic(t) {
  * n = 4: http://easings.net/#easeInQuart
  * n = 5: http://easings.net/#easeInQuint
  */
-function poly(n) {
+function poly(n: number): EasingFunction {
   'worklet';
   return (t) => Math.pow(t, n);
 }
@@ -106,30 +107,30 @@ function poly(n) {
  *
  * http://easings.net/#easeInSine
  */
-function sin(t) {
+const sin: EasingFunction = (t) => {
   'worklet';
   return 1 - Math.cos((t * Math.PI) / 2);
-}
+};
 
 /**
  * A circular function.
  *
  * http://easings.net/#easeInCirc
  */
-function circle(t) {
+const circle: EasingFunction = (t) => {
   'worklet';
   return 1 - Math.sqrt(1 - t * t);
-}
+};
 
 /**
  * An exponential function.
  *
  * http://easings.net/#easeInExpo
  */
-function exp(t) {
+const exp: EasingFunction = (t) => {
   'worklet';
   return Math.pow(2, 10 * (t - 1));
-}
+};
 
 /**
  * A simple elastic interaction, similar to a spring oscillating back and
@@ -141,7 +142,7 @@ function exp(t) {
  *
  * http://easings.net/#easeInElastic
  */
-function elastic(bounciness = 1) {
+function elastic(bounciness: number = 1): EasingFunction {
   'worklet';
   const p = bounciness * Math.PI;
   return (t) => {
@@ -158,9 +159,9 @@ function elastic(bounciness = 1) {
  *
  * - http://tiny.cc/back_default (s = 1.70158, default)
  */
-function back(s = 1.70158) {
+function back(s = 1.70158): EasingFunction {
   'worklet';
-  return (t) => t * t * ((s + 1) * t - s);
+  return (t: number) => t * t * ((s + 1) * t - s);
 }
 
 /**
@@ -168,7 +169,7 @@ function back(s = 1.70158) {
  *
  * http://easings.net/#easeInBounce
  */
-function bounce(t) {
+const bounce: EasingFunction = (t) => {
   'worklet';
   if (t < 1 / 2.75) {
     return 7.5625 * t * t;
@@ -186,7 +187,7 @@ function bounce(t) {
 
   const t2 = t - 2.625 / 2.75;
   return 7.5625 * t2 * t2 + 0.984375;
-}
+};
 
 /**
  * Provides a cubic bezier curve, equivalent to CSS Transitions'
@@ -195,7 +196,12 @@ function bounce(t) {
  * A useful tool to visualize cubic bezier curves can be found at
  * http://cubic-bezier.com/
  */
-function bezier(x1, y1, x2, y2) {
+function bezier(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number
+): EasingFunction {
   'worklet';
   return Bezier(x1, y1, x2, y2);
 }
@@ -203,15 +209,15 @@ function bezier(x1, y1, x2, y2) {
 /**
  * Runs an easing function forwards.
  */
-function in_(easing) {
+const in_: EasingFunction = (easing) => {
   'worklet';
   return easing;
-}
+};
 
 /**
  * Runs an easing function backwards.
  */
-function out(easing) {
+function out(easing: EasingFunction): EasingFunction {
   'worklet';
   return (t) => {
     'worklet';
@@ -224,7 +230,7 @@ function out(easing) {
  * forwards for half of the duration, then backwards for the rest of the
  * duration.
  */
-function inOut(easing) {
+function inOut(easing: EasingFunction): EasingFunction {
   'worklet';
   return (t) => {
     'worklet';

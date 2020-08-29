@@ -1,27 +1,42 @@
-import { useEffect, useRef } from 'react';
-
+import { useEffect, useRef, Component, RefObject } from 'react';
 import WorkletEventHandler from './WorkletEventHandler';
 import { startMapper, stopMapper, makeMutable, makeRemote } from './core';
 import updateProps from './UpdateProps';
 import { initialUpdaterRun } from './animations';
 import { getTag } from './NativeMethods';
+import {
+  ScrollHandlers,
+  SharedValueType,
+  SharedValue,
+  ScrollHandler,
+  OnScroll,
+  Context,
+  AnimatedStyle,
+} from './types';
 
-export function useSharedValue(init) {
+export function useSharedValue<T>(
+  initialValue: T
+): T extends SharedValueType ? SharedValue<T> : never {
   const ref = useRef(null);
   if (ref.current === null) {
     ref.current = {
-      mutable: makeMutable(init),
-      last: init,
+      mutable: makeMutable(initialValue),
+      last: initialValue,
     };
-  } else if (init !== ref.current.last) {
-    ref.current.last = init;
-    ref.current.mutable.value = init;
+  } else if (initialValue !== ref.current.last) {
+    ref.current.last = initialValue;
+    ref.current.mutable.value = initialValue;
   }
 
   return ref.current.mutable;
 }
 
-export function useMapper(fun, inputs = [], outputs = [], dependencies = []) {
+export function useMapper(
+  fun: any,
+  inputs = [],
+  outputs = [],
+  dependencies = []
+) {
   useEffect(() => {
     const mapperId = startMapper(fun, inputs, outputs);
     return () => {
@@ -30,7 +45,7 @@ export function useMapper(fun, inputs = [], outputs = [], dependencies = []) {
   }, dependencies);
 }
 
-export function useEvent(handler, eventNames = []) {
+export function useEvent(handler: any, eventNames = []) {
   const initRef = useRef(null);
   if (initRef.current === null) {
     initRef.current = new WorkletEventHandler(handler, eventNames);
@@ -148,7 +163,7 @@ function isAnimated(prop) {
   return isAnimated(prop);
 }
 
-function styleDiff(oldStyle, newStyle) {
+function styleDiff(oldStyle: AnimatedStyle, newStyle: AnimatedStyle) {
   'worklet';
   const diff = {};
   Object.keys(oldStyle).forEach((key) => {
@@ -175,7 +190,7 @@ function styleDiff(oldStyle, newStyle) {
   return diff;
 }
 
-function styleUpdater(viewTag, updater, state) {
+function styleUpdater(viewTag: any, updater: any, state: any) {
   'worklet';
   const animations = state.animations || {};
 
@@ -255,15 +270,18 @@ function styleUpdater(viewTag, updater, state) {
   }
 }
 
-export function useAnimatedStyle(updater, dependencies) {
+export function useAnimatedStyle<T extends AnimatedStyle>(updater: () => T): T {
   const viewTag = useSharedValue(-1);
   const initRef = useRef(null);
-  const inputs = Object.values(updater._closure);
+  const inputs = Object.values((updater as any)._closure);
 
   // build dependencies
+  //@ts-ignore
   if (dependencies === undefined) {
+    //@ts-ignore
     dependencies = [...inputs, updater.__workletHash];
   } else {
+    //@ts-ignore
     dependencies.push(updater.__workletHash);
   }
 
@@ -286,6 +304,7 @@ export function useAnimatedStyle(updater, dependencies) {
     return () => {
       stopMapper(mapperId);
     };
+    //@ts-ignore
   }, dependencies);
 
   // check for invalid usage of shared values in returned object
@@ -304,10 +323,10 @@ export function useAnimatedStyle(updater, dependencies) {
     );
   }
 
-  return {
+  return ({
     viewTag,
     initial,
-  };
+  } as unknown) as T;
 }
 
 // TODO: we should make sure that when useAP is used we are not assigning styles
@@ -403,7 +422,14 @@ export function useAnimatedGestureHandler(handlers) {
   );
 }
 
-export function useAnimatedScrollHandler(handlers) {
+type UseAnimatedScrollHandler = {
+  <TContext extends Context>(handler: ScrollHandler<TContext>): OnScroll;
+  <TContext extends Context>(handler: ScrollHandlers<TContext>): OnScroll;
+};
+
+export const useAnimatedScrollHandler: UseAnimatedScrollHandler = (
+  handlers
+) => {
   const initRef = useRef(null);
   if (initRef.current === null) {
     initRef.current = {
@@ -426,7 +452,7 @@ export function useAnimatedScrollHandler(handlers) {
     subscribeForEvents.push('onMomentumScrollEnd');
   }
 
-  return useEvent((event) => {
+  return useEvent((event: { eventName: string }) => {
     'worklet';
     const {
       onScroll,
@@ -457,14 +483,14 @@ export function useAnimatedScrollHandler(handlers) {
       onMomentumEnd(event, context);
     }
   }, subscribeForEvents);
-}
+};
 
-export function useAnimatedRef() {
+export function useAnimatedRef<T extends Component>(): RefObject<T> {
   const tag = useSharedValue(-1);
   const ref = useRef(null);
 
   if (!ref.current) {
-    const fun = function(component) {
+    const fun: any = function(component: any) {
       'worklet';
       // enters when ref is set by attaching to a component
       if (component) {
@@ -491,11 +517,14 @@ export function useAnimatedRef() {
  * the first worklet defines the inputs, in other words on which shared values change will it be called.
  * the second one can modify any shared values but those which are mentioned in the first worklet. Beware of that, because this may result in endless loop and high cpu usage.
  */
-export function useAnimatedReaction(prepare, react) {
+export function useAnimatedReaction<T>(
+  prepare: () => T,
+  react: (input: T) => void
+) {
   const inputsRef = useRef(null);
   if (inputsRef.current === null) {
     inputsRef.current = {
-      inputs: Object.values(prepare._closure),
+      inputs: Object.values((prepare as any)._closure),
     };
   }
   const { inputs } = inputsRef.current;

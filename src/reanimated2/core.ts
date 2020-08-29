@@ -1,23 +1,24 @@
 import NativeReanimated from './NativeReanimated';
-
+//@ts-ignore
 global.__reanimatedWorkletInit = function(worklet) {
   worklet.__worklet = true;
 };
-
+//@ts-ignore
 global._WORKLET = false;
+//@ts-ignore
 global._log = function(s) {
   console.log(s);
 };
 
-export function runOnUI(worklet) {
+export function runOnUI(worklet: () => any) {
   return makeShareable(worklet);
 }
 
-export function makeShareable(value) {
+export function makeShareable(value: any) {
   return NativeReanimated.makeShareable(value);
 }
 
-export function getViewProp(viewTag, propName) {
+export function getViewProp(viewTag: any, propName: any) {
   return new Promise((resolve, reject) => {
     return NativeReanimated.getViewProp(viewTag, propName, (result) => {
       if (result.substr(0, 6) === 'error:') {
@@ -29,7 +30,7 @@ export function getViewProp(viewTag, propName) {
   });
 }
 
-function workletValueSetter(value) {
+function workletValueSetter(value: any) {
   'worklet';
   const previousAnimation = this._animation;
   if (previousAnimation) {
@@ -73,7 +74,7 @@ function workletValueSetter(value) {
 
 NativeReanimated.installCoreFunctions(workletValueSetter);
 
-export function makeMutable(value) {
+export function makeMutable(value: any) {
   return NativeReanimated.makeMutable(value);
 }
 
@@ -81,10 +82,10 @@ export function makeRemote(object = {}) {
   return NativeReanimated.makeRemote(object);
 }
 
-export function startMapper(mapper, inputs = [], outputs = []) {
+export function startMapper(mapper: any, inputs = [], outputs = []) {
   return NativeReanimated.startMapper(mapper, inputs, outputs);
 }
 
-export function stopMapper(mapperId) {
+export function stopMapper(mapperId: any) {
   NativeReanimated.stopMapper(mapperId);
 }

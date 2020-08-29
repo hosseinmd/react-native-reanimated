@@ -4,9 +4,16 @@
  * by Gaëtan Renaudeau 2014 - 2015 – MIT License
  */
 
+import { EasingFunction } from './types';
+
 // These values are established by empiricism with tests (tradeoff: performance VS precision)
 
-export function Bezier(mX1, mY1, mX2, mY2) {
+export function Bezier(
+  mX1: number,
+  mY1: number,
+  mX2: number,
+  mY2: number
+): EasingFunction {
   'worklet';
 
   var NEWTON_ITERATIONS = 4;
