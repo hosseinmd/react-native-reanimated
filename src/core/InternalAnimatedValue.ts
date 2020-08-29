@@ -1,4 +1,4 @@
-import AnimatedNode from './AnimatedNode';
+import InternalAnimatedNode from './AnimatedNode';
 import { val } from '../val';
 import ReanimatedModule from '../ReanimatedModule';
 import invariant from 'fbjs/lib/invariant';
@@ -27,7 +27,7 @@ function initializeConstantValues() {
  */
 export default class InternalAnimatedValue<
   T extends Value
-> extends AnimatedNode<T> {
+> extends InternalAnimatedNode<T> {
   protected _animation: any;
   protected _constant: any;
   protected _value: any;
@@ -78,7 +78,7 @@ export default class InternalAnimatedValue<
 
   __onEvaluate() {
     if (this.__inputNodes && this.__inputNodes.length) {
-      this.__inputNodes.forEach(val);
+      ((this.__inputNodes as unknown) as number[]).forEach(val);
     }
     return this._value;
   }

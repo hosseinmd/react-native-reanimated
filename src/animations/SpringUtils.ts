@@ -9,8 +9,8 @@ import {
   and,
   greaterThan,
 } from './../base';
-import AnimatedValue from './../core/InternalAnimatedValue';
-import AnimatedNode from '../core/AnimatedNode';
+import InternalAnimatedValue from './../core/InternalAnimatedValue';
+import { AnimatedNode, AnimatedValue } from '../types';
 
 function stiffnessFromOrigamiValue(oValue: number) {
   return (oValue - 30) * 3.62 + 194;
@@ -209,16 +209,26 @@ function fromBouncinessAndSpeedNumbers(
   };
 }
 
-function makeDefaultConfig() {
+export interface MakeDefaultConfigResponse {
+  stiffness: AnimatedValue<number>;
+  mass: AnimatedValue<number>;
+  damping: AnimatedValue<number>;
+  overshootClamping: false;
+  restSpeedThreshold: 0.001;
+  restDisplacementThreshold: 0.001;
+  toValue: AnimatedValue<number>;
+}
+
+function makeDefaultConfig(): MakeDefaultConfigResponse {
   return {
-    stiffness: new AnimatedValue(100),
-    mass: new AnimatedValue(1),
-    damping: new AnimatedValue(10),
+    stiffness: new InternalAnimatedValue(100),
+    mass: new InternalAnimatedValue(1),
+    damping: new InternalAnimatedValue(10),
     overshootClamping: false,
     restSpeedThreshold: 0.001,
     restDisplacementThreshold: 0.001,
-    toValue: new AnimatedValue(0),
-  };
+    toValue: new InternalAnimatedValue(0),
+  } as any;
 }
 
 export default {

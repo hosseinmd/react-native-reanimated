@@ -26,7 +26,7 @@ export default class AnimatedValue<
         // FIXME handle setting value with a node
         ReanimatedModule.setValue(this.__nodeID, value);
       } else {
-        evaluateOnce(set(this, value), this);
+        evaluateOnce(set(this as any, value), this as any);
       }
     }
   }

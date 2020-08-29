@@ -1,18 +1,22 @@
 import { findNodeHandle } from 'react-native';
 
-import AnimatedNode from './AnimatedNode';
+import InternalAnimatedNode from './AnimatedNode';
 import AnimatedEvent from './AnimatedEvent';
 import { createOrReuseStyleNode } from './AnimatedStyle';
 
 import invariant from 'fbjs/lib/invariant';
 import deepEqual from 'fbjs/lib/areEqual';
 import { val } from '../val';
+import { AnimatedNode } from '../types';
 
 function sanitizeProps(inputProps) {
   let props;
   for (const key in inputProps) {
     const value = inputProps[key];
-    if (value instanceof AnimatedNode && !(value instanceof AnimatedEvent)) {
+    if (
+      value instanceof InternalAnimatedNode &&
+      !(value instanceof AnimatedEvent)
+    ) {
       if (props === undefined) {
         props = {};
       }
@@ -45,7 +49,7 @@ export function createOrReusePropsNode(props, callback, oldNode) {
   return new AnimatedProps(props, config, callback);
 }
 
-class AnimatedProps extends AnimatedNode {
+class AnimatedProps extends InternalAnimatedNode {
   private _props: any;
   private _config: any;
   private _callback: any;
@@ -70,7 +74,7 @@ class AnimatedProps extends AnimatedNode {
     const props = {};
     for (const key in this._props) {
       const value = this._props[key];
-      if (value instanceof AnimatedNode) {
+      if (value instanceof InternalAnimatedNode) {
         props[key] = value.__getValue();
       }
     }
@@ -94,7 +98,7 @@ class AnimatedProps extends AnimatedNode {
       return;
     }
 
-    val(this as AnimatedNode<number>);
+    val((this as unknown) as AnimatedNode<number>);
   }
 
   setNativeView(animatedView) {

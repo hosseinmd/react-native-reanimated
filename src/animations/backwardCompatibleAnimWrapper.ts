@@ -10,24 +10,12 @@ import {
 } from '../base';
 import Clock from '../core/AnimatedClock';
 import { evaluateOnce } from '../derived/evaluateOnce';
+import { AnimatedNode, Value } from '../types';
 
 function createOldAnimationObject(
   node: (arg0: Clock, arg1: any, arg2: any) => any,
   animationStateDefaults: () => any,
-  value: {
-    isNativelyInitialized: () => any;
-    __detachAnimation: (arg0: {
-      start: (currentAnimationCallback: any) => void;
-      stop: () => void;
-    }) => void;
-    __attachAnimation: (arg0: {
-      start: (currentAnimationCallback: any) => void;
-      __detach: () => void;
-      stop: () => void;
-      __stopImmediately_testOnly: (result: any) => void;
-    }) => void;
-    __initialized: any;
-  },
+  value: AnimatedNode<Value>,
   config: any
 ) {
   const newClock = new Clock();
@@ -71,7 +59,7 @@ function createOldAnimationObject(
                     if (!wasStopped) {
                       isDone = true;
                     }
-                    value.__detachAnimation(animation);
+                    (value as any).__detachAnimation(animation);
                     isDone = true;
                     if (!wasStopped) {
                       wasStopped = false;
@@ -83,7 +71,7 @@ function createOldAnimationObject(
               ])
             )
           );
-          value.__attachAnimation(animation);
+          (value as any).__attachAnimation(animation);
           alwaysNode.__addChild(value);
         }
       );
@@ -91,7 +79,7 @@ function createOldAnimationObject(
     __detach: () => {
       animationCallback && animationCallback({ finished: isDone });
       animationCallback = null;
-      value.__initialized && alwaysNode.__removeChild(value);
+      (value as any).__initialized && alwaysNode.__removeChild(value);
     },
     stop: () => {
       if (isDone) {
@@ -112,7 +100,7 @@ function createOldAnimationObject(
     __stopImmediately_testOnly: (result: boolean) => {
       animation.stop();
       isDone = result;
-      value.__detachAnimation(animation);
+      (value as any).__detachAnimation(animation);
     },
   };
   return animation;

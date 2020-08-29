@@ -9,9 +9,12 @@ import {
   greaterOrEq,
   proc,
 } from '../base';
-import AnimatedClock from '../core/AnimatedClock';
-import { TimingState, TimingConfig } from '../types';
-import AnimatedValue from '../core/AnimatedValue';
+import {
+  TimingState,
+  TimingConfig,
+  AnimatedClock,
+  AnimatedValue,
+} from '../types';
 
 const internalTiming = proc(function(
   clock: AnimatedClock,

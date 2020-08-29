@@ -11,8 +11,7 @@ import {
   proc,
   abs,
 } from '../base';
-import AnimatedClock from '../core/AnimatedClock';
-import { DecayConfig, DecayState } from '../types';
+import { DecayConfig, DecayState, AnimatedClock } from '../types';
 
 const VELOCITY_EPS = 5;
 

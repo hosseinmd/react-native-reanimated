@@ -4,7 +4,7 @@
  * by Gaëtan Renaudeau 2014 - 2015 – MIT License
  */
 
-import { EasingFunction } from './types';
+import { EasingFunction } from '../types';
 
 // These values are established by empiricism with tests (tradeoff: performance VS precision)
 

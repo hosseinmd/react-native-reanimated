@@ -1,5 +1,5 @@
 import { Bezier } from './Bezier';
-import { EasingFunction } from './types';
+import { EasingFunction } from '../types';
 
 /**
  * The `Easing` module implements common easing functions. This module is used

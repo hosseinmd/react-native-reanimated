@@ -10,9 +10,9 @@ import {
   sub,
   proc,
 } from '../base';
-import AnimatedNode from '../core/AnimatedNode';
+import InternalAnimatedNode from '../core/AnimatedNode';
 import type {AnimatedConcat} from '../core/AnimatedConcat';
-import { Adaptable, Value } from '../types';
+import { Adaptable, Value, AnimatedNode } from '../types';
 
 const procColor = proc(function(r: Adaptable<Value>, g: Adaptable<Value>, b: Adaptable<Value>, a: any) {
   const color = add(
@@ -44,11 +44,11 @@ export default function color(
     return concat('rgba(', r, ',', g, ',', b, ',', a, ')');
   }
 
-  if (a instanceof AnimatedNode) {
+  if (a instanceof InternalAnimatedNode) {
     a = round(multiply(a, 255)) as any;
   } else {
     a = Math.round((a as number) * 255);
   }
 
-  return procColor(r, g, b, a) as AnimatedNode<number>;
+  return procColor(r, g, b, a) as unknown as AnimatedNode<number>;
 }

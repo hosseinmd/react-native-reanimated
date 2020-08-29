@@ -1,7 +1,8 @@
-import AnimatedNode from './AnimatedNode';
-import type AnimatedClock from './AnimatedClock';
+import InternalAnimatedNode from './AnimatedNode';
+import AnimatedClock from './AnimatedClock';
+import { AnimatedNode } from '../types';
 
-class AnimatedClockTest extends AnimatedNode {
+class AnimatedClockTest extends InternalAnimatedNode {
   _clockNode;
 
   constructor(clockNode) {
@@ -19,5 +20,5 @@ class AnimatedClockTest extends AnimatedNode {
 }
 
 export function createAnimatedClockTest(clock: AnimatedClock) {
-  return new AnimatedClockTest(clock) as AnimatedNode<number>;
+  return (new AnimatedClockTest(clock) as unknown) as AnimatedNode<number>;
 }

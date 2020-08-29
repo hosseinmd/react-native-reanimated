@@ -10,9 +10,10 @@ import {
 } from '../operators';
 import invariant from 'fbjs/lib/invariant';
 
-import AnimatedNode from '../core/AnimatedNode';
+import InternalAnimatedNode from '../core/AnimatedNode';
 import { createAnimatedCond as cond } from '../core/AnimatedCond';
 import { createAnimatedFunction as proc } from '../core/AnimatedFunction';
+import { AnimatedNode } from '../types';
 
 const interpolateInternalSingleProc = proc(function(
   value,
@@ -60,7 +61,10 @@ export enum Extrapolate {
 function checkNonDecreasing(name, arr) {
   for (let i = 1; i < arr.length; ++i) {
     // We can't validate animated nodes in JS.
-    if (arr[i] instanceof AnimatedNode || arr[i - 1] instanceof AnimatedNode)
+    if (
+      arr[i] instanceof InternalAnimatedNode ||
+      arr[i - 1] instanceof InternalAnimatedNode
+    )
       continue;
     invariant(
       arr[i] >= arr[i - 1],
@@ -83,7 +87,8 @@ function checkMinElements(name, arr) {
 function checkValidNumbers(name, arr) {
   for (let i = 0; i < arr.length; i++) {
     // We can't validate animated nodes in JS.
-    if (arr[i] instanceof AnimatedNode || typeof arr[i] !== 'number') continue;
+    if (arr[i] instanceof InternalAnimatedNode || typeof arr[i] !== 'number')
+      continue;
     invariant(
       Number.isFinite(arr[i]),
       '%s cannot include %s. (%s)',

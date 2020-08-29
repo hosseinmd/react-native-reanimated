@@ -12,7 +12,7 @@ import {
   OnScroll,
   Context,
   AnimatedStyle,
-} from './types';
+} from '../types';
 
 export function useSharedValue<T>(
   initialValue: T

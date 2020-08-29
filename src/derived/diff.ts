@@ -1,6 +1,6 @@
 import { cond, block, defined, sub, set, proc } from '../base';
 import AnimatedValue from '../core/InternalAnimatedValue';
-import { Adaptable } from '../types';
+import { Adaptable, Value } from '../types';
 
 const procDiff = proc(function(v, stash, prev) {
   return block([
@@ -10,7 +10,7 @@ const procDiff = proc(function(v, stash, prev) {
   ]);
 });
 
-export default function diff(v: Adaptable) {
+export default function diff(v: Adaptable<Value>) {
   const stash = new AnimatedValue(0);
   const prev = new AnimatedValue();
   return procDiff(v, stash, prev);

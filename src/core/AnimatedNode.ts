@@ -100,9 +100,9 @@ export default class AnimatedNode<T extends Value = string | number | boolean> {
     this.__initialized = false;
     this.__inputNodes =
       inputNodes &&
-      (inputNodes.filter(
+      ((inputNodes.filter(
         (node) => node instanceof AnimatedNode
-      ) as AnimatedNode[]);
+      ) as unknown) as AnimatedNode[]);
   }
 
   toString() {

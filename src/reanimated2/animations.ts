@@ -6,7 +6,7 @@ import {
   SharedValue,
   WithTimingConfig,
   SharedValueType,
-} from './types';
+} from '../types';
 
 let IN_STYLE_UPDATER = false;
 

@@ -1,16 +1,16 @@
 import invariant from 'fbjs/lib/invariant';
 import { adapt } from '../core/AnimatedBlock';
-import AnimatedNode from './AnimatedNode';
+import InternalAnimatedNode from './AnimatedNode';
 import { val } from '../val';
-import { Adaptable, Value } from '../types';
+import { Adaptable, Value, AnimatedNode } from '../types';
 
-export class AnimatedConcat extends AnimatedNode {
+export class AnimatedConcat extends InternalAnimatedNode {
   private _input: Adaptable<Value>[];
   constructor(input: Adaptable<Value>[]) {
     invariant(
       input.every(
         (el: any) =>
-          el instanceof AnimatedNode ||
+          el instanceof InternalAnimatedNode ||
           typeof el === 'number' ||
           typeof el === 'string'
       ),
@@ -29,15 +29,8 @@ export class AnimatedConcat extends AnimatedNode {
   }
 }
 
-export function createAnimatedConcat(
-  ...args: (
-    | string
-    | number
-    | AnimatedNode<number>
-    | readonly (
-        | number
-        | AnimatedNode<number>
-        | readonly (number | AnimatedNode<number>)[])[])[]
-) {
-  return new AnimatedConcat(args.map(adapt)) as AnimatedNode<string>;
+export function createAnimatedConcat(...args: (Adaptable<Value>)[]) {
+  return (new AnimatedConcat(args.map(adapt)) as unknown) as AnimatedNode<
+    string
+  >;
 }

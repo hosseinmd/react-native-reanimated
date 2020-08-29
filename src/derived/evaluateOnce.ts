@@ -1,10 +1,9 @@
-import AnimatedValue from '../core/InternalAnimatedValue';
+import InternalAnimatedValue from '../core/InternalAnimatedValue';
 import { createAnimatedSet as set } from '../core/AnimatedSet';
 import { createAnimatedCall as call } from '../core/AnimatedCall';
 import { createAnimatedAlways as always } from '../core/AnimatedAlways';
 import { createAnimatedCond as cond } from '../core/AnimatedCond';
-import { Adaptable, Value } from '../types';
-import AnimatedNode from '../core/AnimatedNode';
+import { AnimatedValue, Value, AnimatedNode } from '../types';
 
 /**
  * evaluate given node and notify children
@@ -14,20 +13,22 @@ import AnimatedNode from '../core/AnimatedNode';
  */
 
 export function evaluateOnce(
-  node: AnimatedNode,
-  input: AnimatedNode[] | AnimatedNode = [],
+  node: AnimatedNode<Value>,
+  input: AnimatedNode<Value>[] | AnimatedNode<Value> = [],
   callback?: () => void
 ) {
   if (!Array.isArray(input)) {
     input = [input];
   }
-  const done = new AnimatedValue<number>(0);
+  const done = (new InternalAnimatedValue<number>(
+    0
+  ) as unknown) as AnimatedValue<number>;
   const evalNode = cond(
     done,
     0,
     call([node, set(done, 1)], () => {
       callback && callback();
-      for (let i = 0; i < (input as AnimatedNode[]).length; i++) {
+      for (let i = 0; i < (input as AnimatedNode<Value>[]).length; i++) {
         input[i].__removeChild(alwaysNode);
         alwaysNode.__detach();
       }
@@ -35,7 +36,7 @@ export function evaluateOnce(
   );
   const alwaysNode = always(evalNode);
   for (let i = 0; i < input.length; i++) {
-    input[i].__addChild(alwaysNode);
+    (input[i] as any).__addChild(alwaysNode);
     alwaysNode.__attach();
   }
 }

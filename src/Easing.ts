@@ -10,10 +10,7 @@ import {
   divide,
 } from './base';
 import AnimatedBezier from './core/AnimatedBezier';
-import AnimatedNode from './core/AnimatedNode';
-import { Adaptable } from './types';
-
-export type EasingFunction = (value: Adaptable<number>) => Adaptable<number>;
+import { Adaptable, AnimatedNode, EasingNodeFunction } from './types';
 
 /**
  * The `Easing` module implements common easing functions. This module is used
@@ -67,8 +64,8 @@ export default class Easing {
    *
    * http://cubic-bezier.com/#0,0,1,1
    */
-  static linear: EasingFunction = (t) => {
-    return t;
+  static linear: EasingNodeFunction = (t) => {
+    return t as any;
   };
 
   /**
@@ -77,8 +74,10 @@ export default class Easing {
    *
    * http://cubic-bezier.com/#.42,0,1,1
    */
-  static ease: EasingFunction = (t) => {
-    return new AnimatedBezier(t, 0.42, 0, 1, 1) as AnimatedNode<number>;
+  static ease: EasingNodeFunction = (t) => {
+    return (new AnimatedBezier(t, 0.42, 0, 1, 1) as unknown) as AnimatedNode<
+      number
+    >;
   };
 
   /**
@@ -87,7 +86,7 @@ export default class Easing {
    *
    * http://easings.net/#easeInQuad
    */
-  static quad: EasingFunction = (t) => {
+  static quad: EasingNodeFunction = (t) => {
     return multiply(t, t);
   };
 
@@ -97,7 +96,7 @@ export default class Easing {
    *
    * http://easings.net/#easeInCubic
    */
-  static cubic: EasingFunction = (t) => {
+  static cubic: EasingNodeFunction = (t) => {
     return multiply(t, t, t);
   };
 
@@ -107,7 +106,7 @@ export default class Easing {
    * n = 4: http://easings.net/#easeInQuart
    * n = 5: http://easings.net/#easeInQuint
    */
-  static poly(n: number): EasingFunction {
+  static poly(n: number): EasingNodeFunction {
     return (t) => pow(t, n);
   }
 
@@ -116,7 +115,7 @@ export default class Easing {
    *
    * http://easings.net/#easeInSine
    */
-  static sin: EasingFunction = (t) => {
+  static sin: EasingNodeFunction = (t) => {
     return sub(1, cos(multiply(t, Math.PI, 0.5)));
   };
 
@@ -125,7 +124,7 @@ export default class Easing {
    *
    * http://easings.net/#easeInCirc
    */
-  static circle: EasingFunction = (t) => {
+  static circle: EasingNodeFunction = (t) => {
     return sub(1, sqrt(sub(1, multiply(t, t))));
   };
 
@@ -134,7 +133,7 @@ export default class Easing {
    *
    * http://easings.net/#easeInExpo
    */
-  static exp: EasingFunction = (t) => {
+  static exp: EasingNodeFunction = (t) => {
     return pow(2, multiply(10, sub(t, 1)));
   };
 
@@ -148,13 +147,13 @@ export default class Easing {
    *
    * http://easings.net/#easeInElastic
    */
-  static elastic(bounciness: number = 1): EasingFunction {
+  static elastic(bounciness: number = 1): EasingNodeFunction {
     const p = bounciness * Math.PI;
     return (t) =>
       sub(
         1,
         multiply(pow(cos(multiply(t, Math.PI, 0.5)), 3), cos(multiply(t, p)))
-      );
+      ) as any;
   }
 
   /**
@@ -165,11 +164,11 @@ export default class Easing {
    *
    * - http://tiny.cc/back_default (s = 1.70158, default)
    */
-  static back(s?: number): EasingFunction {
+  static back(s?: number): EasingNodeFunction {
     if (s === undefined) {
       s = 1.70158;
     }
-    return (t) => multiply(t, t, sub(multiply(add(s, 1), t), s));
+    return (t) => multiply(t, t, sub(multiply(add(s, 1), t), s)) as any;
   }
 
   /**
@@ -177,7 +176,7 @@ export default class Easing {
    *
    * http://easings.net/#easeInBounce
    */
-  static bounce: EasingFunction = (t) => {
+  static bounce: EasingNodeFunction = (t) => {
     const sq = (v: Adaptable<number>) => multiply(7.5625, v, v);
     return cond(
       lessThan(t, 1 / 2.75),
@@ -191,7 +190,7 @@ export default class Easing {
           add(0.984375, sq(sub(t, 2.625 / 2.75)))
         )
       )
-    );
+    ) as any;
   };
 
   /**
@@ -206,22 +205,22 @@ export default class Easing {
     y1: number,
     x2: number,
     y2: number
-  ): EasingFunction {
-    return (t) => new AnimatedBezier(t, x1, y1, x2, y2) as AnimatedNode<number>;
+  ): EasingNodeFunction {
+    return (t) => new AnimatedBezier(t, x1, y1, x2, y2) as any;
   }
 
   /**
    * Runs an easing function forwards.
    */
-  static in(easing: EasingFunction): EasingFunction {
+  static in(easing: EasingNodeFunction): EasingNodeFunction {
     return easing;
   }
 
   /**
    * Runs an easing function backwards.
    */
-  static out(easing: EasingFunction): EasingFunction {
-    return (t) => sub(1, easing(sub(1, t)));
+  static out(easing: EasingNodeFunction): EasingNodeFunction {
+    return (t) => sub(1, easing(sub(1, t))) as any;
   }
 
   /**
@@ -229,12 +228,12 @@ export default class Easing {
    * forwards for half of the duration, then backwards for the rest of the
    * duration.
    */
-  static inOut(easing: EasingFunction): EasingFunction {
-    return (t: any) =>
+  static inOut(easing: EasingNodeFunction): EasingNodeFunction {
+    return (t) =>
       cond(
         lessThan(t, 0.5),
         divide(easing(multiply(t, 2)), 2),
         sub(1, divide(easing(multiply(sub(1, t), 2)), 2))
-      );
+      ) as any;
   }
 }

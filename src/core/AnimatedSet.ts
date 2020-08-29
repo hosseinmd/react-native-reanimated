@@ -1,19 +1,20 @@
-import AnimatedNode from './AnimatedNode';
+import InternalAnimatedNode from './AnimatedNode';
 import invariant from 'fbjs/lib/invariant';
 import { val } from '../val';
 import { adapt } from '../core/AnimatedBlock';
+import { AnimatedNode, Value, Adaptable } from '../types';
 
-class AnimatedSet extends AnimatedNode {
+class AnimatedSet extends InternalAnimatedNode {
   _what;
   _value;
 
   constructor(what, value) {
     invariant(
-      what instanceof AnimatedNode,
+      what instanceof InternalAnimatedNode,
       `Reanimated: Animated.set first argument should be of type AnimatedNode but got ${what}`
     );
     invariant(
-      value instanceof AnimatedNode,
+      value instanceof InternalAnimatedNode,
       `Reanimated: Animated.set second argument should be of type AnimatedNode, String or Number but got ${value}`
     );
     super({ type: 'set', what, value }, [value]);
@@ -33,6 +34,11 @@ class AnimatedSet extends AnimatedNode {
   }
 }
 
-export function createAnimatedSet(what, value) {
-  return new AnimatedSet(what, adapt(value));
+export function createAnimatedSet(
+  what: AnimatedNode<Value>,
+  value: Adaptable<Value>
+) {
+  return (new AnimatedSet(what, adapt(value)) as unknown) as AnimatedNode<
+    number
+  >;
 }
